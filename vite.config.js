@@ -4,6 +4,7 @@ import UnoCSS from 'unocss/vite'
 import presetUno from 'unocss/preset-uno'
 import presetIcons from 'unocss/preset-icons'
 import extractorSvelte from '@unocss/extractor-svelte'
+import transformerDirectives from '@unocss/transformer-directives'
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,6 +16,9 @@ export default defineConfig({
       ],
       extractors: [
         extractorSvelte()
+      ],
+      transformers: [
+        transformerDirectives()
       ]
     }),
     svelte()

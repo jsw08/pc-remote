@@ -14,6 +14,9 @@ devDependencies:
   '@unocss/extractor-svelte':
     specifier: ^0.58.0
     version: 0.58.0
+  '@unocss/transformer-directives':
+    specifier: ^0.58.0
+    version: 0.58.0
   svelte:
     specifier: ^4.2.3
     version: 4.2.8
