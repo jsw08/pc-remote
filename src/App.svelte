@@ -53,24 +53,26 @@
         });
     });
   const requestState = (): Promise<boolean> =>
-    request("status", "res s").then((v) => (v[6] === "1" ? true : false));
+    request("s", "res s").then((v) => (v[6] === "1" ? true : false));
 
-  const togglePower = (cstate: boolean | undefined): Promise<boolean> =>
-    request("press", "pressed").then((v) => !cstate);
+  // const togglePower = (cstate: boolean | undefined): Promise<boolean> =>
+    // request("p", "res p").then((v) => !cstate);
+  const togglePower = (cstate: boolean | undefined): Promise<boolean> => new Promise(r => r(!cstate))
   const logout = () => ($channel = "");
   let cpromise: Promise<boolean> | undefined = $channel
-    ? requestState()
+    //? requestState()
+    ? new Promise((r) => r(true))
     : undefined;
 </script>
 
 {#await cpromise}
-  <button class="btn btn-neutral btn" disabled
-    ><span class="loading loading-ring loading-lg"></span></button
+  <button class="btn btn-neutral btn btn-square" disabled
+    ><span class="loading loading-spinner loading-lg"></span> loading</button
   >
 {:then cstate}
   <button
     data-state={cstate}
-    class="btn"
+    class="btn h-32 "
     class:btn-success={cstate}
     class:btn-error={!cstate}
     on:click={() => (cpromise = togglePower(cstate))}
@@ -110,7 +112,7 @@
   </div>
 {/await}
 
-<div class="absolute right-0 bottom-0 sm:top-3 p-3">
+<div class="absolute right-0 bottom-0 sm:top-0 p-3">
   <button class="btn btn-square btn-outline" on:click={() => cpromise = requestState()}>
     <svg
       xmlns="http://www.w3.org/2000/svg"
