@@ -55,32 +55,33 @@
   const requestState = (): Promise<boolean> =>
     request("s", "res s").then((v) => (v[6] === "1" ? true : false));
 
-  // const togglePower = (cstate: boolean | undefined): Promise<boolean> =>
-    // request("p", "res p").then((v) => !cstate);
-  const togglePower = (cstate: boolean | undefined): Promise<boolean> => new Promise(r => r(!cstate))
+  const togglePower = (cstate: boolean | undefined): Promise<boolean> =>
+    request("p", "res p").then((v) => !cstate);
   const logout = () => ($channel = "");
   let cpromise: Promise<boolean> | undefined = $channel
-    //? requestState()
-    ? new Promise((r) => r(true))
+    ? requestState()
     : undefined;
 </script>
 
 {#await cpromise}
-  <button class="btn btn-neutral btn btn-square" disabled
-    ><span class="loading loading-spinner loading-lg"></span> loading</button
+  <button
+    class="btn btn-neutral aspect-square h-32 sm:h-48 md:h-56 lg:h-72 xl:h-96 sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl"
+    disabled
+    ><span
+      class="loading loading-spinner loading-lg sm:loading-md md:loading-lg xl:scale-110"
+    ></span><span class="hidden sm:inline">loading</span></button
   >
 {:then cstate}
   <button
     data-state={cstate}
-    class="btn h-32 "
+    class="btn aspect-square h-32 sm:h-48 md:h-56 lg:h-72 xl:h-96"
     class:btn-success={cstate}
     class:btn-error={!cstate}
     on:click={() => (cpromise = togglePower(cstate))}
     ><svg
       xmlns="http://www.w3.org/2000/svg"
-      width="32"
-      height="32"
       viewBox="0 0 24 24"
+      class="aspect-square h-16 sm:h-24 md:h-28 lg:h-36 xl:h-48 text-white dark:text-black"
       ><path
         fill="currentColor"
         d="M12 3a9 9 0 0 0-9 9a9 9 0 0 0 9 9a9 9 0 0 0 9-9a9 9 0 0 0-9-9m0 16a7 7 0 0 1-7-7a7 7 0 0 1 7-7a7 7 0 0 1 7 7a7 7 0 0 1-7 7m1-2h-2V7h2z"
@@ -101,7 +102,7 @@
         d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
       /></svg
     >
-    <span>ERROR: {error}</span>
+    <span>{error}</span>
     <div>
       <button class="btn btn-sm" on:click={logout}>Logout</button>
       <button
@@ -112,8 +113,11 @@
   </div>
 {/await}
 
-<div class="absolute right-0 bottom-0 sm:top-0 p-3">
-  <button class="btn btn-square btn-outline" on:click={() => cpromise = requestState()}>
+<div class="join absolute right-0 bottom-0 sm:top-0 p-3">
+  <button
+    class="btn btn-square btn-outline join-item"
+    on:click={() => (cpromise = requestState())}
+  >
     <svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
@@ -125,7 +129,9 @@
       /></svg
     >
   </button>
-  <button class="btn btn-square btn-outline" on:click={logout}
+  <button
+    class="btn btn-square btn-outline join-item hover:btn-error"
+    on:click={logout}
     ><svg
       xmlns="http://www.w3.org/2000/svg"
       width="24"
@@ -140,7 +146,6 @@
 </div>
 
 <dialog
-  id="my_modal_5"
   class="bg-base-200 modal modal-bottom sm:modal-middle"
   open={$channel === ""}
 >

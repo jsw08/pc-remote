@@ -23,6 +23,7 @@
     "vite": "^5.0.8"
   },
   "dependencies": {
-    "@macfja/svelte-persistent-store": "^2.4.1"
+    "@macfja/svelte-persistent-store": "^2.4.1",
+    "@tailwindcss/typography": "^0.5.10"
   }
 }
