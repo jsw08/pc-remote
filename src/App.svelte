@@ -1,5 +1,6 @@
 <script lang="ts">
   import { channel } from "./store";
+  const LOGS = false;
 
   let value: string;
   const handleLogin = (): void => {
@@ -18,7 +19,7 @@
         .then(async (res) => {
           if (!res.ok) {
             const err = await res.text();
-            console.error(err);
+            if (LOGS) console.error(err);
             reject(
               new Error("Something went wrong while asing for the status.")
             );
@@ -30,14 +31,14 @@
             reject(new Error(`Response took too long. Over ${maxWait}ms.`));
           }, maxWait);
           sse.onerror = (e) => {
-            console.error(e);
+            if (LOGS) console.error(e);
             reject(
               new Error("Something went wrong while listening for a response.")
             );
           };
           sse.onmessage = (e) => {
             const data = JSON.parse(e.data);
-            console.log(data);
+            if (LOGS) console.log(data);
             if (!data.message) return;
             if (!data.message.includes(query)) return;
 
@@ -113,9 +114,9 @@
   </div>
 {/await}
 
-<div class="join absolute right-0 bottom-0 sm:top-0 p-3">
+<div class="w-full flex justify-between sm:block sm:w-fit absolute right-0 bottom-0 join join-horizontal sm:top-0 p-3">
   <button
-    class="btn btn-square btn-outline join-item"
+    class="btn btn-square btn-outline sm:join-item"
     on:click={() => (cpromise = requestState())}
   >
     <svg
@@ -130,7 +131,7 @@
     >
   </button>
   <button
-    class="btn btn-square btn-outline join-item hover:btn-error"
+    class="btn btn-square btn-outline sm:join-item hover:btn-error"
     on:click={logout}
     ><svg
       xmlns="http://www.w3.org/2000/svg"
