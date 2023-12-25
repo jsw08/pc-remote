@@ -15,6 +15,9 @@
       fetch(`https://ntfy.sh/${$channel}`, {
         method: "POST",
         body: body,
+        headers: {
+          "Tags": "remote"
+        }
       })
         .then(async (res) => {
           if (!res.ok) {
@@ -41,6 +44,7 @@
             if (LOGS) console.log(data);
             if (!data.message) return;
             if (!data.message.includes(query)) return;
+            if (data.tags[0] != "mcu") return;
 
             clearTimeout(sseTimeout);
             sse.close();
