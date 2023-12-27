@@ -9,53 +9,67 @@
     cpromise = requestState();
   };
 
+  type NtfyRES = {
+    id: string;
+    time: number;
+    expires: number;
+    event: "open" | "keepalive" | "message" | "poll_request";
+    topic: string;
+    message?: string;
+    title?: string;
+    tags?: Array<string>;
+    priority?: number;
+    click?: string;
+    actions?: {};
+    attachment?: {
+        name: string;
+        url: string;
+        type?: string;
+        size?: number;
+        expires?: number;
+    };
+}
+
   const maxWait: number = 10 * 1000; // max timeout is 10s
   const request = (body: string, query: string): Promise<string> =>
-    new Promise((resolve, reject) => {
-      fetch(`https://ntfy.sh/${$channel}`, {
-        method: "POST",
-        body: body,
-        headers: {
-          "Tags": "remote"
-        }
-      })
-        .then(async (res) => {
-          if (!res.ok) {
-            const err = await res.text();
-            if (LOGS) console.error(err);
-            reject(
-              new Error("Something went wrong while asing for the status.")
-            );
-          }
-
-          let sse = new EventSource(`https://ntfy.sh/${$channel}/sse`);
-          const sseTimeout = setTimeout(() => {
-            sse.close();
-            reject(new Error(`Response took too long. Over ${maxWait}ms.`));
-          }, maxWait);
-          sse.onerror = (e) => {
-            if (LOGS) console.error(e);
-            reject(
-              new Error("Something went wrong while listening for a response.")
-            );
-          };
-          sse.onmessage = (e) => {
-            const data = JSON.parse(e.data);
-            if (LOGS) console.log(data);
-            if (!data.message) return;
-            if (!data.message.includes(query)) return;
-            if (data.tags[0] != "mcu") return;
-
-            clearTimeout(sseTimeout);
-            sse.close();
-            resolve(data.message);
-          };
-        })
-        .catch(() => {
-          reject(
-            new Error("Something went wrong while asking for the status.")
-          );
+    new Promise(async (resolve, reject) => {
+      let res: Response;
+      try {
+        res = await fetch(`https://ntfy.sh/${$channel}`, {
+          method: "POST",
+          body: body,
+          headers: {
+            Tags: "remote",
+          },
         });
+        if (!res.ok) throw Error();
+      } catch (e) {
+        const text: string = await res.text();
+        if (LOGS) console.error(e, text);
+        reject(new Error("Something went wrong while asking for the status."));
+      }
+
+      let sse: EventSource = new EventSource(`https://ntfy.sh/${$channel}/sse`);
+      const sseTimeout: number = setTimeout(() => {
+        sse.close();
+        reject(new Error(`Response took too long. Over ${maxWait}ms.`));
+      }, maxWait);
+
+      sse.onerror = (e) => {
+        if (LOGS) console.error(e);
+        reject(
+          new Error("Something went wrong while listening for a response.")
+        );
+      };
+      sse.onmessage = (e) => {
+        const data: NtfyRES = JSON.parse(e.data);
+        if (LOGS) console.log(data);
+        if (data.event !== "message" || !data.message.includes(query) || !data.tags || data.tags[0] !== "mcu") return;
+
+        sse.close();
+        clearTimeout(sseTimeout);
+        resolve(data.message);
+      };
     });
   const requestState = (): Promise<boolean> =>
     request("s", "res s").then((v) => (v[6] === "1" ? true : false));
@@ -118,7 +132,9 @@
   </div>
 {/await}
 
-<div class="w-full flex justify-between sm:block sm:w-fit absolute right-0 bottom-0 join join-horizontal sm:top-0 p-3">
+<div
+  class="w-full flex justify-between sm:block sm:w-fit absolute right-0 bottom-0 join join-horizontal sm:top-0 p-3"
+>
   <button
     class="btn btn-square btn-outline sm:join-item"
     on:click={() => (cpromise = requestState())}
